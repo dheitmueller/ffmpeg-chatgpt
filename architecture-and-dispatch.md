@@ -42,8 +42,10 @@ retains the scalar implementation for smaller decoder tails.
 Selecting an implementation that produces the wrong native-endian pixel format
 is a correctness regression, even if it works on every commonly tested host.
 An endian guard is an appropriate immediate fallback when an optimized routine
-has not been made correct. When support is small and idiomatic, prefer fixing
-the assembly and retaining normal SIMD dispatch on both endian modes.
+has not been made correct. FFmpeg does not require existing AArch64 assembly to
+support big-endian hosts, per Martin Storsjö's review of PR #24544. This PR's
+decision to support both endian modes is an optional robustness improvement,
+not a general dispatch requirement.
 
 Do not infer endian portability from successful little-endian tests. Inspect the
 element types of every load/store and execute a big-endian build when possible.

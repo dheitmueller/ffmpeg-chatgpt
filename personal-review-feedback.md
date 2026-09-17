@@ -10,6 +10,63 @@ context-specific advice.
 
 ## Current checklist
 
+### Keep jointly loaded assembly constants in one block
+
+**Provenance:** PR #24544 review, Martin Storsjö.
+
+**Feedback:** Five separately declared 16-byte constants were always loaded
+together. They should be one `const ... endconst` block; internal labels are
+only needed if individual offsets are referenced.
+
+**Classification:** confirmed AArch64 assembly style guidance.
+
+**Future check:** Are adjacent constants consumed as one unit? If so, declare
+them as one unit rather than relying on several sections remaining consecutive.
+
+### Avoid unnecessary AArch64 NEON preprocessor guards
+
+**Provenance:** PR #24544 review, Martin Storsjö.
+
+**Feedback:** The `#if HAVE_NEON` guards around both the assembly declaration
+and initializer body are not normally used on AArch64. `have_neon()` includes
+`HAVE_NEON`, and AArch64 toolchains support NEON.
+
+**Classification:** confirmed maintainer guidance.
+
+**Future check:** Compare architecture initializer structure with neighboring
+AArch64 initializers. Do not add redundant feature ifdefs around declarations
+or code already handled by the feature predicate.
+
+### Do not infer big-endian AArch64 requirements from existing assembly
+
+**Provenance:** PR #24544 discussion, Martin Storsjö.
+
+**Feedback:** FFmpeg explicitly does not care about big-endian AArch64 in its
+existing AArch64 assembly. The bitpacked implementation may support it, but
+review should not present that as a project-wide requirement.
+
+**Classification:** confirmed maintainer scope guidance.
+
+**Future check:** Separate optional portability improvements from configurations
+the project actually promises to support. Do not generalize from an absence of
+guards without maintainer or documentation evidence.
+
+### Keep historical sponsorship attribution at its original scope
+
+**Provenance:** PR #24544 review, Martin Storsjö; discussion with Devin.
+
+**Feedback:** Duplicating `Development sponsored by CBC/Radio-Canada` into a new
+internal header looked unusual. Once its origin was explained, Martin had no
+strong objection, but suggested keeping it in the original source file may be
+enough for the small moved function.
+
+**Classification:** personal cleanup check; reviewer expressed no strong
+requirement.
+
+**Future check:** Preserve historical attribution in its original file. Copy it
+to a new file only when the moved work and provenance make that scope accurate
+and useful.
+
 ### Validate every enabled architecture configuration
 
 **Provenance:** forgejo_fairy combined review of FFmpeg PR #24544, 2026-09.

@@ -43,7 +43,16 @@ authorized force-with-lease update on 2026-09-17.
 
 ## Remaining review considerations
 
-- Watch PR #24544 for new feedback before changing the source again.
+- Forgejo_Fairy's follow-up review and Michael Niedermayer approved head
+  `52e81e8cc5` on 2026-09-17; no correctness blocker remains.
+- Martin Storsjö left a non-blocking cleanup review. Pending changes are to
+  combine the five jointly loaded AArch64 constants into one `const` block and
+  remove both unnecessary `HAVE_NEON` guards. Removing the duplicated
+  CBC/Radio-Canada sponsorship comment from the new init header is reasonable
+  but was explicitly described as not a strong preference.
+- Martin also clarified that FFmpeg does not require big-endian AArch64 support
+  in existing AArch64 assembly. The PR's working big-endian path may remain as
+  an optional robustness improvement.
 - If the branch is rewritten, rerun relevant checks, regenerate v2 or a later
   reroll, inspect the final PR diff, and push only after explicit authorization.
 - A decoder-level FATE sample would be useful if an appropriate sample becomes

@@ -37,14 +37,18 @@ loop and register idioms.
 
 ## AArch64 endianness
 
-FFmpeg does not generally disable ARM SIMD on big-endian hosts. Most routines
-are endian-neutral by construction, and the few explicit cases adapt tables or
-instructions rather than withholding dispatch.
+Do not infer a project requirement for big-endian AArch64 support from the
+absence of dispatch guards. Martin Storsjö stated during review of PR #24544
+that FFmpeg explicitly does not care about big-endian AArch64 in existing
+AArch64 assembly. Supporting it can still be worthwhile when the change is
+small, but it is voluntary rather than an upstream requirement.
 
 Repository audit on 2026-09-17:
 
 - 67 AArch64 `.S` files and 73 32-bit ARM `.S` files were inspected by search.
-- No established AArch64 initializer used `!HAVE_BIGENDIAN && have_neon(...)`.
+- No established AArch64 initializer used `!HAVE_BIGENDIAN && have_neon(...)`;
+  maintainer feedback establishes that this is not evidence of big-endian
+  support.
 - `libavcodec/arm/sbcdsp_init_arm.c` explicitly changes permutation tables for
   host endianness while retaining its optimized implementation.
 - `libavcodec/aarch64/huffyuvdsp_neon.S` and
@@ -65,6 +69,15 @@ The bitpacked NEON decoder therefore loads packed input as byte elements,
 loads arithmetic constants and stores output as halfword elements, and uses a
 big-endian `rev32` after the exact four-byte scalar tail load. This preserves
 the packed stream's byte order while producing native-endian `uint16_t` planes.
+
+## AArch64 constants and feature guards
+
+- When several tables are always loaded together as one contiguous block, put
+  them inside one `const ... endconst` block. Add internal labels only when code
+  actually addresses the individual offsets.
+- On AArch64, do not normally wrap NEON declarations or initializer bodies in
+  `#if HAVE_NEON`. `have_neon()` incorporates `HAVE_NEON`, and NEON is supported
+  by all AArch64-targeting toolchains relevant to FFmpeg.
 
 ## x86 feature tiers
 
