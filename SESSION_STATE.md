@@ -4,26 +4,27 @@
 
 - FFmpeg checkout: `/Users/dheitmueller/ffmpeg.git`
 - Topic branch: `bitpacked-dec-simd`
-- Upstream base at last rewrite: `d66ee0411c`
+- Upstream base at last rewrite: `a79a84a9fe`
 - Pull request: <https://code.ffmpeg.org/FFmpeg/FFmpeg/pulls/24544>
 - Fork remote branch: `dheitmueller/FFmpeg:bitpacked-dec-simd`
 
 Current four-commit series:
 
 ```text
-4977d6c002 avcodec/bitpacked: add AArch64 NEON unpacking
-56f0ceb3de checkasm: add bitpacked decoder test
-721d8a993a avcodec/bitpacked: add x86 SIMD unpacking
-52e81e8cc5 avcodec/bitpacked: add AVX-512ICL unpacking
+2f3e5c63db avcodec/bitpacked: add AArch64 NEON unpacking
+796d4d993a checkasm: add bitpacked decoder test
+96ac9bece7 avcodec/bitpacked: add x86 SIMD unpacking
+a5c0ad2280 avcodec/bitpacked: add AVX-512ICL unpacking
 ```
 
-The local and remote topic branch matched at `52e81e8cc5` after the explicitly
-authorized force-with-lease update on 2026-09-17.
+The local branch was rewritten after Martin Storsjö's cleanup review and is at
+`a5c0ad2280`. It has intentionally not been pushed; Devin plans to review and
+push it. The remote PR branch remains at the previous `52e81e8cc5` head.
 
 ## Generated artifacts
 
 - Patch directory: `/Users/dheitmueller/ffmpeg-bitpacked-submit-patches`
-- Current patch series uses the `v2-` filename prefix.
+- Current patch series uses the `v3-` filename prefix.
 - AArch64 benchmark report:
   `/Users/dheitmueller/ffmpeg-bitpacked-aarch64-benchmark-report.md`
 - x86 benchmark report:
@@ -32,6 +33,9 @@ authorized force-with-lease update on 2026-09-17.
 ## Validation completed
 
 - Apple M4: 300 checkasm repetitions and `fate-checkasm-bitpackeddec` passed.
+- The post-review v3 rewrite passed another 300 native iterations, targeted
+  FATE, `checkheaders`, `fate-source`, and an AArch64 `HAVE_NEON=0` build that
+  confirmed no unresolved NEON symbol reference.
 - Apple M4 final focused result: 860.3 ns C, 225.1 ns NEON, 3.82x.
 - Big-endian AArch64: 6,600 scalar-versus-NEON cases passed under a freestanding
   `qemu-system-aarch64` harness using real big-endian EL1 data accesses.
@@ -45,11 +49,11 @@ authorized force-with-lease update on 2026-09-17.
 
 - Forgejo_Fairy's follow-up review and Michael Niedermayer approved head
   `52e81e8cc5` on 2026-09-17; no correctness blocker remains.
-- Martin Storsjö left a non-blocking cleanup review. Pending changes are to
-  combine the five jointly loaded AArch64 constants into one `const` block and
-  remove both unnecessary `HAVE_NEON` guards. Removing the duplicated
-  CBC/Radio-Canada sponsorship comment from the new init header is reasonable
-  but was explicitly described as not a strong preference.
+- Martin Storsjö's non-blocking cleanup review is addressed locally: the five
+  jointly loaded AArch64 constants are one `const` block, the unnecessary
+  `HAVE_NEON` guards are removed, and the duplicated CBC/Radio-Canada
+  sponsorship comment was removed from the new init header while remaining in
+  its original source file.
 - Martin also clarified that FFmpeg does not require big-endian AArch64 support
   in existing AArch64 assembly. The PR's working big-endian path may remain as
   an optional robustness improvement.
