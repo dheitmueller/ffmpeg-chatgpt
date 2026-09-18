@@ -11,14 +11,14 @@
 Current four-commit series:
 
 ```text
-64e951c1b9 avcodec/bitpacked: add AArch64 NEON unpacking
-a81597b090 checkasm: add bitpacked decoder test
-12fd55fb45 avcodec/bitpacked: add x86 SIMD unpacking
-62670921a2 avcodec/bitpacked: add AVX-512ICL unpacking
+f448236c66 avcodec/bitpacked: add AArch64 NEON unpacking
+7d6cd18cfa checkasm: add bitpacked decoder test
+17ae358c18 avcodec/bitpacked: add x86 SIMD unpacking
+a212bbac76 avcodec/bitpacked: add AVX-512ICL unpacking
 ```
 
 The local branch was rewritten after Martin Storsjö's endianness follow-up and
-is at `62670921a2`. It has intentionally not been pushed; Devin plans to review
+is at `a212bbac76`. It has intentionally not been pushed; Devin plans to review
 and push it. The remote PR branch remains at `a5c0ad2280`.
 
 ## Generated artifacts
