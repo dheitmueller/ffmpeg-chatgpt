@@ -10,6 +10,21 @@ context-specific advice.
 
 ## Current checklist
 
+### Credit maintainers whose feedback shapes a patch
+
+**Provenance:** Submission practice requested by Devin after PR #24544 review.
+
+**Feedback:** When a maintainer takes the time to provide substantive feedback,
+credit them in the relevant patch description after incorporating it. Besides
+showing appreciation, this tells other reviewers that the revision reflects
+guidance from someone with established project expertise.
+
+**Classification:** standing personal submission practice.
+
+**Future check:** Before finalizing a reroll, identify maintainers whose review
+materially changed the implementation and include a concise acknowledgment in
+the affected patch description.
+
 ### Keep jointly loaded assembly constants in one block
 
 **Provenance:** PR #24544 review, Martin Storsjö.

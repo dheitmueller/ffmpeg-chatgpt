@@ -47,6 +47,10 @@ measurement. State the observed values and scope.
   architecture configuration.
 - Convert reviewer observations into regression coverage when possible.
 - Distinguish independently reproduced results from review-draft claims.
+- When a maintainer's feedback materially shapes a revision, thank them by name
+  in the relevant patch description. This acknowledges their contribution and
+  records for later reviewers that the submitted design already reflects
+  informed upstream feedback.
 - Update the existing pull request by rewriting its topic branch when requested;
   do not create replacement PRs that lose discussion history.
 - Never push a rewritten source branch without explicit authorization. When
