@@ -42,14 +42,15 @@ or code already handled by the feature predicate.
 **Provenance:** PR #24544 discussion, Martin Storsjö.
 
 **Feedback:** FFmpeg explicitly does not care about big-endian AArch64 in its
-existing AArch64 assembly. The bitpacked implementation may support it, but
-review should not present that as a project-wide requirement.
+existing AArch64 assembly. After the optional implementation was demonstrated,
+Martin requested that the patch stop spending effort on it; Linux was also
+removing big-endian AArch64 support.
 
 **Classification:** confirmed maintainer scope guidance.
 
 **Future check:** Separate optional portability improvements from configurations
-the project actually promises to support. Do not generalize from an absence of
-guards without maintainer or documentation evidence.
+the project actually promises to support. Prefer a correct scalar fallback when
+a maintainer says an exotic SIMD configuration is outside project scope.
 
 ### Keep historical sponsorship attribution at its original scope
 
@@ -67,6 +68,54 @@ requirement.
 to a new file only when the moved work and provenance make that scope accurate
 and useful.
 
+### Avoid chained post-index loads on in-order AArch64 cores
+
+**Provenance:** PR #24544 review, Martin Storsjö.
+
+**Feedback:** A second post-index load using a base updated by the first load
+creates a serial address dependency. Prefer two loads from the original base
+followed by one explicit pointer update. `ldp q0, q1` may be faster on some
+cores, but is not universally preferable to `ld1`.
+
+**Resolution:** Changed the 40-byte load to `ld1` without writeback, `ldr` at
+offset 32, then one `add x0, x0, #40`. Native M4 timings were within noise.
+LLVM scheduling models favored eliminating the dependency on A53/A55/A72 and
+N2; `ld1` was safer across the examined cores than `ldp`.
+
+**Future check:** Treat post-index addressing as both an instruction-count tool
+and a dependency choice. Model in-order targets, not only the development CPU.
+
+### Schedule independent SIMD operations between dependencies
+
+**Provenance:** PR #24544 review, Martin Storsjö.
+
+**Feedback:** Move the independent V `shl` after the Y `mul` operations so an
+in-order core does not immediately consume the preceding `tbl` result.
+
+**Resolution:** Applied to both the main macro and eight-pixel tail.
+
+**Future check:** Even when an out-of-order desktop core hides latency, arrange
+independent work between producer and consumer instructions where it costs
+nothing.
+
+### Explain non-obvious SIMD constants and test instruction alternatives
+
+**Provenance:** PR #24544 review, Martin Storsjö.
+
+**Feedback:** The `mul` transformation and table numbers were surprising. A
+per-lane shift is more literal, although the reviewer explicitly left relative
+throughput open for measurement.
+
+**Resolution:** Added comments identifying the Y/U/V shuffle indices and
+per-lane multipliers. Native M4 measurements did not show a meaningful `ushl`
+advantage. LLVM models were mixed and predicted worse `ushl` reciprocal
+throughput on A76, N1, and N2, so the multiply-plus-common-shift form remains;
+its 16-bit overflow performs the necessary trim without another instruction.
+
+**Future check:** Preserve compact, unconventional transforms when measured or
+modeled performance supports them, but document the mathematical purpose next
+to their constants.
+
 ### Validate every enabled architecture configuration
 
 **Provenance:** forgejo_fairy combined review of FFmpeg PR #24544, 2026-09.
@@ -76,9 +125,10 @@ but the routine mixed byte-element and whole-register loads/stores and produced
 corrupt native-endian `YUV422P10` output. Little-endian testing did not establish
 big-endian correctness.
 
-**Resolution:** The assembly was made endian-neutral using element-aware loads
-and stores plus a big-endian tail reversal. It passed 6,600 scalar comparisons
-under QEMU big-endian EL1 data mode.
+**Resolution:** An endian-neutral version passed 6,600 scalar comparisons under
+QEMU big-endian EL1 data mode. After maintainer clarification, the submitted
+version instead restores `!HAVE_BIGENDIAN` dispatch and removes the extra
+big-endian assembly handling, so big-endian hosts use the C implementation.
 
 **Classification:** confirmed correctness requirement.
 

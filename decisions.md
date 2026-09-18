@@ -17,28 +17,36 @@ of the row loop, and lets AArch64 and x86 implementations share one contract.
 this after confirming the decoder's padding guarantee and benchmarking the
 change with guarded-buffer coverage.
 
-## AArch64 support on both endian modes
+## AArch64 endianness scope
 
-**Decision:** Use element-aware loads/stores and dispatch NEON on both little-
-and big-endian AArch64.
+**Decision:** Dispatch the NEON implementation only when `!HAVE_BIGENDIAN` and
+retain the C fallback on big-endian AArch64.
 
-**Rejected alternative:** Keep `!HAVE_BIGENDIAN` in the initializer.
+**Rejected alternative:** Carry an endian-neutral assembly variant using
+element-aware loads/stores and a big-endian tail reversal.
 
-**Rationale:** The required support is small, matches neighboring ARM assembly
-practice, and passed QEMU execution. A guard was the correct temporary safety
-fix before validation, but is unnecessary in the final implementation.
+**Rationale:** The endian-neutral variant was functionally validated under
+QEMU, but Martin Storsjö clarified that big-endian AArch64 is not a supported
+target worth expanding this patch for; Linux was concurrently removing its
+big-endian AArch64 support. The guard keeps the rare configuration correct
+without adding assembly that upstream does not expect contributors to maintain
+or benchmark. The little-endian path can retain the simpler `ldr`/`str` form.
 
-## Unconditional element-aware main path
+## AArch64 load and bit-alignment forms
 
-**Decision:** Use `ld1/st1` element operations unconditionally for the main
-AArch64 paths, with only the scalar four-byte tail reversal conditional on host
-endianness.
+**Decision:** Load each 40-byte block with a non-writeback `ld1`, an independent
+`ldr` at offset 32, and one explicit pointer `add`. Keep the per-lane
+`mul {4,64}` followed by the common right shift.
 
-**Rationale:** This expresses the real byte/halfword contract and resembles
-other FFmpeg ARM routines. Exploratory paired timings suggested a possible small
-M4 difference, but later one-second checkasm measured 225.1 ns and 3.82x versus
-the auto-vectorized C reference. Avoid claiming either equivalence or regression
-without broader measurements.
+**Rejected alternatives:** Two chained post-index loads; `ldp` for the first
+32 bytes; and replacing the multiplies with per-lane `ushl` operations.
+
+**Rationale:** Removing the address dependency helps modeled in-order cores and
+does not materially change M4 performance. `ldp` was modeled worse on A55 and
+slightly worse on A76/N1. Native timings did not establish an `ushl` win, while
+models predict lower `ushl` throughput on several newer cores. The multiply
+form also uses 16-bit overflow to trim unwanted bits without another operation;
+comments now make that non-obvious transform explicit.
 
 ## AVX-512 feature level
 

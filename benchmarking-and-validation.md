@@ -33,7 +33,7 @@ submissions:
 
 ```sh
 ./tests/checkasm/checkasm --bench --test=bitpackeddec \
-    --duration=1000000 95000
+    --function=bitpacked_unpack_yuv422p10 --duration=1000000 95000
 ```
 
 Report:
@@ -56,8 +56,8 @@ differences conservatively.
 Apple M4 Mac mini, Apple clang 17.0.0, AArch64 `cntvct` timing:
 
 ```text
-bitpacked_unpack_yuv422p10_c:       860.3 ns
-bitpacked_unpack_yuv422p10_neon:    225.1 ns (3.82x)
+bitpacked_unpack_yuv422p10_c:       876.8 ns
+bitpacked_unpack_yuv422p10_neon:    227.2 ns (3.86x)
 ```
 
 Apple clang auto-vectorizes the C reference with NEON. This is therefore a
@@ -91,10 +91,10 @@ SIMD primarily reduces instruction/dependency overhead rather than memory
 volume. Large end-to-end gains may therefore be limited once other decoder work
 or memory/cache behavior dominates.
 
-## Big-endian QEMU validation
+## Historical big-endian QEMU validation
 
-The bitpacked NEON implementation was validated on 2026-09-17 using a
-freestanding 64-bit MSB ELF under `qemu-system-aarch64`:
+The experimental endian-neutral bitpacked NEON implementation was validated on
+2026-09-17 using a freestanding 64-bit MSB ELF under `qemu-system-aarch64`:
 
 - QEMU `virt` machine with a Cortex-A72 CPU model.
 - Execution at EL1 with `SCTLR_EL1.EE` and `E0E` enabled.
@@ -114,7 +114,9 @@ BITPACKED BIG-ENDIAN PASS
 ```
 
 QEMU establishes functional behavior for the emulated architecture. It does
-not establish performance on real big-endian ARM hardware.
+not establish performance on real big-endian ARM hardware. The experiment was
+later removed from the submitted patch at maintainer request; the final dispatch
+keeps big-endian AArch64 on the C implementation.
 
 ## Portability validation
 

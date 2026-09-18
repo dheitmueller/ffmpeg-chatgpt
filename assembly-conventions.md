@@ -40,8 +40,10 @@ loop and register idioms.
 Do not infer a project requirement for big-endian AArch64 support from the
 absence of dispatch guards. Martin Storsjö stated during review of PR #24544
 that FFmpeg explicitly does not care about big-endian AArch64 in existing
-AArch64 assembly. Supporting it can still be worthwhile when the change is
-small, but it is voluntary rather than an upstream requirement.
+AArch64 assembly. Supporting it can still be worthwhile in another context,
+but it is voluntary rather than an upstream requirement. For PR #24544 the
+maintainer explicitly preferred restoring a dispatch guard and removing the
+extra assembly handling.
 
 Repository audit on 2026-09-17:
 
@@ -65,10 +67,10 @@ Important AArch64 distinction:
   whole-register operations with byte-element loads and halfword arithmetic can
   silently assume little-endian register layout.
 
-The bitpacked NEON decoder therefore loads packed input as byte elements,
-loads arithmetic constants and stores output as halfword elements, and uses a
-big-endian `rev32` after the exact four-byte scalar tail load. This preserves
-the packed stream's byte order while producing native-endian `uint16_t` planes.
+An experimental bitpacked version used those element-aware operations plus a
+big-endian `rev32` after the exact four-byte tail load and passed QEMU tests.
+The submitted decoder instead retains its simpler little-endian `ldr`/`str`
+implementation and excludes big-endian hosts in the initializer.
 
 ## AArch64 constants and feature guards
 

@@ -57,6 +57,8 @@ measurement. State the observed values and scope.
 FFmpeg PR #24544 adds bitpacked decoder SIMD for AArch64 and x86:
 <https://code.ffmpeg.org/FFmpeg/FFmpeg/pulls/24544>
 
-Its AArch64 commit documents reproducible native benchmarking and big-endian
-QEMU validation; the x86 commits document feature-tier fallback and
-cross-object-format assembly checks.
+Its AArch64 commit documents reproducible native benchmarking and preserves the
+C fallback on big-endian hosts; the x86 commits document feature-tier fallback
+and cross-object-format assembly checks. The discarded big-endian assembly
+variant remains a useful validation case in this notebook, not a submission
+claim.
