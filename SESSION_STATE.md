@@ -4,22 +4,23 @@
 
 - FFmpeg checkout: `/Users/dheitmueller/ffmpeg.git`
 - Topic branch: `bitpacked-dec-simd`
-- Upstream base at last rewrite: `1ef0d9d701`
+- Upstream base at last rewrite: `be387f252d`
 - Pull request: <https://code.ffmpeg.org/FFmpeg/FFmpeg/pulls/24544>
 - Fork remote branch: `dheitmueller/FFmpeg:bitpacked-dec-simd`
 
 Current four-commit series:
 
 ```text
-f448236c66 avcodec/bitpacked: add AArch64 NEON unpacking
-7d6cd18cfa checkasm: add bitpacked decoder test
-17ae358c18 avcodec/bitpacked: add x86 SIMD unpacking
-a212bbac76 avcodec/bitpacked: add AVX-512ICL unpacking
+7bf8031e02 avcodec/bitpacked: add AArch64 NEON unpacking
+874622d243 checkasm: add bitpacked decoder test
+756cf9d6f8 avcodec/bitpacked: add x86 SIMD unpacking
+d824a25786 avcodec/bitpacked: add AVX-512ICL unpacking
 ```
 
-The local branch was rewritten after Martin Storsjö's endianness follow-up and
-is at `a212bbac76`. It has intentionally not been pushed; Devin plans to review
-and push it. The remote PR branch remains at `a5c0ad2280`.
+The local branch was rebased after CI found that current master added a base64
+checkasm registration at the same insertion points as bitpackeddec. It is at
+`d824a25786` and has intentionally not been pushed. The remote PR branch remains
+at `a212bbac76`.
 
 ## Generated artifacts
 
@@ -36,6 +37,10 @@ and push it. The remote PR branch remains at `a5c0ad2280`.
 - The post-review rewrites passed another 300 native iterations, targeted
   FATE, `checkheaders`, `fate-source`, and an AArch64 `HAVE_NEON=0` build that
   confirmed no unresolved NEON symbol reference.
+- After rebasing onto `be387f252d`, seeds 66300-66599, targeted FATE,
+  `checkheaders`, and `fate-source` passed. Both the new base64 and bitpackeddec
+  registrations are retained alphabetically. The regenerated v4 patches apply
+  cleanly to that base and reproduce the topic branch tree.
 - Apple M4 final focused result: 876.8 ns C, 227.2 ns NEON, 3.86x.
 - The submitted initializer keeps big-endian AArch64 on the C fallback. An
   earlier endian-neutral assembly experiment passed 6,600 scalar-versus-NEON
