@@ -51,6 +51,11 @@ measurement. State the observed values and scope.
   in the relevant patch description. This acknowledges their contribution and
   records for later reviewers that the submitted design already reflects
   informed upstream feedback.
+- Preserve useful maintainer observations in the developer notebook, especially
+  architecture-specific details that are not obvious from manuals or existing
+  code. Record the original context, which CPU classes may be affected, the
+  resulting implementation decision, and whether supporting evidence came from
+  hardware measurements, analytical models, or maintainer experience.
 - Update the existing pull request by rewriting its topic branch when requested;
   do not create replacement PRs that lose discussion history.
 - Never push a rewritten source branch without explicit authorization. When

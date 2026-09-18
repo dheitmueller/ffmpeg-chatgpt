@@ -10,6 +10,23 @@ context-specific advice.
 
 ## Current checklist
 
+### Preserve experienced maintainers' tacit knowledge
+
+**Provenance:** Standing workbook practice requested by Devin after Martin
+Storsjö's AArch64 review of PR #24544.
+
+**Feedback:** Long-time assembly maintainers often contribute microarchitecture
+insights that are difficult to recover from instruction references or source
+inspection alone. Do not leave those observations buried only in a pull-request
+thread.
+
+**Classification:** standing developer-notebook practice.
+
+**Future check:** Capture reusable observations with attribution and context.
+Separate measured results from analytical-model output and experienced judgment;
+record all three when available. Note whether advice is universal, applies only
+to some cores, or is a low-risk scheduling preference.
+
 ### Credit maintainers whose feedback shapes a patch
 
 **Provenance:** Submission practice requested by Devin after PR #24544 review.
