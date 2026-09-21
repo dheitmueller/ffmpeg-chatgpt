@@ -4,28 +4,30 @@
 
 - FFmpeg checkout: `/Users/dheitmueller/ffmpeg.git`
 - Topic branch: `bitpacked-dec-simd`
-- Upstream base at last rewrite: `be387f252d`
+- Upstream base at last rewrite: `c5b5e08eae`
 - Pull request: <https://code.ffmpeg.org/FFmpeg/FFmpeg/pulls/24544>
 - Fork remote branch: `dheitmueller/FFmpeg:bitpacked-dec-simd`
 
-Current four-commit series:
+Current five-commit series:
 
 ```text
-7bf8031e02 avcodec/bitpacked: add AArch64 NEON unpacking
-874622d243 checkasm: add bitpacked decoder test
-756cf9d6f8 avcodec/bitpacked: add x86 SIMD unpacking
-d824a25786 avcodec/bitpacked: add AVX-512ICL unpacking
+40af78693f avcodec/bitpacked: refactor to support assembly optimizations
+680ce53fbb checkasm: add bitpacked decoder test
+a4782ec433 avcodec/bitpacked: add AArch64 NEON unpacking
+a5c7887a36 avcodec/bitpacked: add x86 SIMD unpacking
+e9cebbaa4d avcodec/bitpacked: add AVX-512ICL unpacking
 ```
 
-The local branch was rebased after CI found that current master added a base64
-checkasm registration at the same insertion points as bitpackeddec. It is at
-`d824a25786` and has intentionally not been pushed. The remote PR branch remains
-at `a212bbac76`.
+At maintainer request, the DSP interface refactor is now independent of the
+AArch64 implementation, and checkasm coverage precedes all optimized code. The
+series is rebased onto current master and each commit was compiled without its
+successors. It is at `e9cebbaa4d` and has intentionally not been pushed. The
+remote PR branch remains at `d824a25786`.
 
 ## Generated artifacts
 
 - Patch directory: `/Users/dheitmueller/ffmpeg-bitpacked-submit-patches`
-- Current patch series uses the `v4-` filename prefix.
+- Current patch series uses the `v5-` filename prefix.
 - AArch64 benchmark report:
   `/Users/dheitmueller/ffmpeg-bitpacked-aarch64-benchmark-report.md`
 - x86 benchmark report:
@@ -34,6 +36,13 @@ at `a212bbac76`.
 ## Validation completed
 
 - Apple M4: 300 checkasm repetitions and `fate-checkasm-bitpackeddec` passed.
+- On the current five-patch series, the refactor commit compiled independently.
+  The checkasm commit compiled independently and passed targeted FATE; reporting
+  no optimized functions to test at this point is expected because only the C
+  reference exists. The AArch64 commit then compiled independently and passed
+  50 native randomized checkasm seeds.
+- The final current-base AArch64 tip passed another 300 randomized checkasm
+  seeds, targeted FATE, `checkheaders`, and `fate-source`.
 - The post-review rewrites passed another 300 native iterations, targeted
   FATE, `checkheaders`, `fate-source`, and an AArch64 `HAVE_NEON=0` build that
   confirmed no unresolved NEON symbol reference.
@@ -46,11 +55,18 @@ at `a212bbac76`.
   earlier endian-neutral assembly experiment passed 6,600 scalar-versus-NEON
   cases under a freestanding `qemu-system-aarch64` harness, but was removed at
   maintainer request.
-- Linux x86: 300 checkasm repetitions passed.
+- Linux x86: the x86 SIMD commit compiled independently before AVX-512 was
+  applied and passed 50 randomized SSSE3/AVX2 checkasm seeds, targeted FATE,
+  and `checkheaders`.
+- The final x86 tip passed 300 randomized checkasm seeds on a Xeon E-2356G,
+  exercising SSSE3, AVX2, and AVX-512ICL at runtime; targeted FATE also passed.
 - x86 assembly built for ELF, COFF, and Mach-O in 32- and 64-bit modes; ELF was
   also checked in PIC and non-PIC configurations.
-- The v4 patch series applied cleanly to its upstream base and reproduced the
-  topic branch tree.
+- The v5 patch series applied cleanly to `c5b5e08eae` and reproduced the topic
+  branch tree exactly (`1188e3a29f8696fe9eaaa5a005137727aae3ca7f`).
+- The AArch64 assembly file is unchanged from the reviewed series. The x86 and
+  AVX-512 commits retain stable patch IDs `488e4dad056f9185bd9c8c896c168dbf9a4fb9d9`
+  and `72f0fe5ad5574541cc06f5c16215e9e2519330cf`, respectively.
 
 ## Remaining review considerations
 

@@ -5,11 +5,22 @@
 - Keep logically separate architecture implementations in separate commits
   when each is independently reviewable.
 - Place shared refactoring before architecture implementations that require it.
+- When a refactor creates a testable DSP boundary, prefer the review order
+  `refactor -> checkasm -> architecture implementations`. This lets reviewers
+  evaluate the interface separately, demonstrates its contract before assembly
+  is introduced, and keeps every intermediate commit buildable.
+- Compile each commit without its successors. For a checkasm commit that lands
+  before optimized implementations, a targeted run may legitimately report no
+  optimized functions to compare; targeted FATE must still build and pass.
 - Keep fixups out of the submitted history.
 - Rebase onto the intended upstream base and inspect the final diff after the
   rewrite.
 - Generate patches with `git format-patch`; validate them by applying them to a
-  clean worktree at the target base.
+  clean worktree at the target base and compare the resulting tree ID with the
+  tested topic branch.
+- When restructuring an already-reviewed series, use stable patch IDs and file
+  blob IDs to prove which later diffs remained unchanged. Commit hashes alone
+  cannot establish this because reordering changes their parent identities.
 
 ## Commit messages for performance changes
 
